@@ -42,7 +42,7 @@ NEWSCHEMA('User', function(schema) {
 			if (o.email) builder.where('email', o.email);
 			if (o.login) builder.where('!lower(login)', o.login);  
 			if (o.role) builder.in('role', o.role);	    	
-			if (o.password) builder.where('pass', o.password.md5());	    				
+			if (o.password) builder.where('password', o.password.md5());	    				
 			if (U.isArray(o.status)) builder.in('status', o.status);      		                  		
 	       		else if (typeof o.status == 'string') builder.in('status', (o.status == 'active') ? [1] : (o.status == 'all') ? [0,1] : [0]);                             	
 	        	else if (isNum(o.status)) builder.where('status', o.status);                               
@@ -54,7 +54,8 @@ NEWSCHEMA('User', function(schema) {
                 LOGGER('error', 'User/get', err);          
                 return $.success(false);	        
             }    
-            return $.callback(resp||null);
+			if (!resp) $.success(false);
+            return $.success(true, resp);			
         }, 'user')     
     }); 
     
@@ -105,7 +106,24 @@ NEWSCHEMA('User', function(schema) {
 
 	});
 
-    schema.addWorkflow('grid', function($) {		
+    schema.addWorkflow('grid', function($) {
+		var q = $.query;
+		q.page = q.page || 1;
+		q.limit = q.limit || 2;
+		var sql = DB(); 		
+		sql.debug = true;
+		sql.listing('user', 'user').make(function(builder) {
+			builder.like('last_name', q.last_name, '*');
+			builder.page(q.page, q.limit);
+		})
+
+		sql.exec(function(err, resp) {                      
+			if (err) {
+				LOGGER('error', 'User/grid', err);
+				return $.success(false);
+			}									
+			return $.success(true, resp);
+		}, 'user')			
     });
 })
 
@@ -117,9 +135,9 @@ NEWSCHEMA('User/Login', function(schema) {
 	schema.addWorkflow('exec', async function($) {
 	    try {            
             var model = schema.clean($.model);
-            var user = await Pr.get('User', model);	            
+            var user = await Pr.get('User', model);	  						
 
-            if (!user) {            	
+			if (!user) {            	
                 $.success(false, RESOURCE('!user_pass'));                
                 return; 
             }

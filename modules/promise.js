@@ -4,8 +4,8 @@ exports.version = "1.0";
 exports.get = function(schema, helper, controller) {
 	return new Promise((resolve, reject) => {
 	  	$$$(schema).get(helper, (err, res) =>{	  		  	
-	  		if (err) reject(err);
-	  		resolve(res);	  	
+	  		if (err) reject(err);			
+	  		resolve(res.value);	  	
 	  	}, controller);
 	}); 
 }
