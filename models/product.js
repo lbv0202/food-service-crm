@@ -5,7 +5,7 @@ NEWSCHEMA('Product', function(schema) {
     schema.define('category_id', 'Number',           'c' );
     schema.define('name',        'String(50)', true, 'cu');
     schema.define('price',       'Number',     true, 'cu');
-    schema.define('dicount',     'Number',           'cu');
+    schema.define('discount',     'Number',           'cu');
     schema.define('imgs',        'String(100)',      'cu');
     schema.define('summary',     'String(100)',      'cu');
     schema.define('description', 'String(500)',      'cu');
@@ -36,7 +36,7 @@ NEWSCHEMA('Product', function(schema) {
                            'description',
                            'status',
                            'created_at',
-                           'updates_at');
+                           'updated_at');
             if (o.id) builder.in('id', o.id);
             if (o.category_id) builder.in('category_id', o.category_id);
             if (o.name) builder.in('name', o.name);
@@ -81,7 +81,7 @@ NEWSCHEMA('Product', function(schema) {
     });
 
     schema.setRemove(function ($) {
-        var o = Object.assign({}, U.isEmpty($.query) ? $.options : $.query);									
+        var o = Object.assign({}, U.isEmpty($.params) ? $.options : $.params);									
 		var sql = DB(); 
 		sql.debug = true;
 
@@ -92,13 +92,13 @@ NEWSCHEMA('Product', function(schema) {
             builder.where('id', o.id);
         });
 
-        sql.exec(function(err, resp){
+        sql.exec(function(err, resp) {
             if (err) {
-                LOGGER('error', 'prosuct/remove', err);
+                LOGGER('error', 'Product/remove', err);
                 return $.success(false);
             }
-            if (!resp) $.success(false);
-            return $.success(true, resp);
+            if (!resp) $.success(false, 'Product not found');
+            return $.success(true);
         }, 'product');
     });
 
