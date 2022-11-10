@@ -40,9 +40,9 @@ NEWSCHEMA('User', function(schema) {
 						   'updated_at');
 			if (o.id) builder.in('id', o.id);   
 			if (o.email) builder.where('email', o.email);
-			if (o.login) builder.where('!lower(login)', o.login);  
-			if (o.role) builder.in('role', o.role);	    	
+			if (o.login) builder.where('!lower(login)', o.login);     	
 			if (o.password) builder.where('password', o.password.md5());	    				
+			if (o.role) builder.in('role', o.role);	
 			if (U.isArray(o.status)) builder.in('status', o.status);      		                  		
 	       		else if (typeof o.status == 'string') builder.in('status', (o.status == 'active') ? [1] : (o.status == 'all') ? [0,1] : [0]);                             	
 	        	else if (isNum(o.status)) builder.where('status', o.status);                               

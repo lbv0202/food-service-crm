@@ -7,4 +7,6 @@ LOCALIZE('/forms/*.html', ['compress']);
 //setting const
 MODULE('Utilit').setConstant();
 //setting for company                                                                                                                                                                                                                          
-MODULE('Utilit').setCompany();    
+MODULE('Utilit').setCompany();  
+// выбрать cdn
+MODULE('Utilit').setCDN();  

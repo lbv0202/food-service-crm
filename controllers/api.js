@@ -13,9 +13,18 @@ exports.install = function() {
     ROUTE('GET    /api/product/grid',                 ['*Product-->@grid']           );
 
     //product_category
-    ROUTE('GET    /api/product_category',             ['*Product_category-->@get']   );
-    ROUTE('POST   /api/product_category',             ['*Product_category-->@save']  );
-    ROUTE('DELETE /api/product_category/{id}',        ['*Product_category-->@remove']);
-    ROUTE('GET    /api/product_category/grid',        ['*Product_category-->@grid']  );
+    ROUTE('GET    /api/product/category',             ['*Product/Category-->@get']   );
+    ROUTE('POST   /api/product/category',             ['*Product/Category-->@save']  );
+    ROUTE('DELETE /api/product/category/{id}',        ['*Product/Category-->@remove']);
+    ROUTE('GET    /api/product/category/grid',        ['*Product/Category-->@grid']  );
+    ROUTE('GET    /api/product/category/query',       ['*Product/Category-->@query'] );
     
+    //  proxy
+    PROXY('/cdn/upload', MAIN.cdn.upload);
+    FILE('/cdn/image/', img_proxy, ['.jpg', '.jpeg', '.png', '.gif']);
+}
+
+function img_proxy(req, res) {
+    res.proxy(CONF.cdn.host + '/' + req.path.slice(-2).join('/'), NOOP);
+    return;
 }
