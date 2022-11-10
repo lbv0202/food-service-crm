@@ -110,8 +110,9 @@ NEWSCHEMA('Product', function(schema) {
         sql.debug = true;
         sql.listing('product', 'product').make(function(builder){
             builder.page(q.page, q.limit);
+            builder.join('product_category', 'product_category.id = product.category_id');
         });
-
+                
         sql.exec(function(err, resp) {
             if (err) {
                 LOGGER('error', 'product/grid', err);
