@@ -5,7 +5,7 @@ NEWSCHEMA('Product', function(schema) {
     schema.define('category_id', 'Number',           'c' );
     schema.define('name',        'String(50)', true, 'cu');
     schema.define('price',       'Number',     true, 'cu');
-    schema.define('discount',     'Number',           'cu');
+    schema.define('discount',    'Number',           'cu');
     schema.define('imgs',        'String(100)',      'cu');
     schema.define('summary',     'String(100)',      'cu');
     schema.define('description', 'String(500)',      'cu');
@@ -47,7 +47,7 @@ NEWSCHEMA('Product', function(schema) {
                 else if (isNum(o.status)) builder.where('status', o.status);                               
                 else builder.where('status', 1); 
                     builder.first();		
-        })
+        });
         sql.exec(function(err, resp) {
             if (err) {
                 LOGGER('error', 'Product/get', err);
@@ -58,7 +58,7 @@ NEWSCHEMA('Product', function(schema) {
         }, 'product');
     });
 
-    schema.setSave(function($) {
+    schema.setSave(function ($) {
         var model = schema.clean($.model);
         var isINSERT = (model.id == 0) ? true : false;
         var act = isINSERT ? 'c' : 'u';
@@ -69,7 +69,7 @@ NEWSCHEMA('Product', function(schema) {
             if (isINSERT) {
                 builder.where('id', model.id);
             }                
-        })
+        });
         sql.exec(function(err, resp) {
             if (err) {
                 LOGGER('error', 'product/save', err);
@@ -102,7 +102,7 @@ NEWSCHEMA('Product', function(schema) {
         }, 'product');
     });
 
-    schema.addWorkflow('grid', function ($){
+    schema.addWorkflow('grid', function ($) {
         var q = $.query;
         q.page = q.page || 1;
         q.limit = q.limit || 5;

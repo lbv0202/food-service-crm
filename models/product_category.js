@@ -109,6 +109,6 @@ NEWSCHEMA('Product_category', function(schema) {
             }
             if (!resp) $.success(false);
             return $.success(true, resp);
-        }, 'produt_category');
+        }, 'product_category');
     });
 });
