@@ -109,7 +109,7 @@ NEWSCHEMA('User', function(schema) {
     schema.addWorkflow('grid', function($) {
 		var q = $.query;
 		q.page = q.page || 1;
-		q.limit = q.limit || 2;
+		q.limit = q.limit || 30;
 		var sql = DB(); 		
 		sql.debug = true;
 		sql.listing('user', 'user').make(function(builder) {

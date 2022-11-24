@@ -1,6 +1,7 @@
 error     			: Error
 !unexpected			: An unexpected error has occurred. Contact customer support.
 !error_400			: Bad request
+!error_401          : Not authoriezd
 !error_403			: Forbidden
 !error_404			: Not Found
 !error_500			: Internal Server Error

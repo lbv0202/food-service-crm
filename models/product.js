@@ -120,10 +120,11 @@ NEWSCHEMA('Product', function(schema) {
         sql.exec(function(err, resp) {
             if (err) {
                 LOGGER('error', 'product/grid', err);
-                return $.success(false);
+                return $.callback([]);
             }
-            if (!resp) $.success(false);
-            return $.success(true, resp);
+            //if (!resp) $.success(false);
+            return $.callback({'total': resp.count, 'rows': resp.items});             
+            //return $.success(true, resp);
         }, 'product');
     });
 });
@@ -248,7 +249,7 @@ NEWSCHEMA('Product/Category', function(schema) {
     });
 
     schema.setQuery(function($) {
-        var o = Object.assign({}, isEmpty($.query) ? $.options : $.query);
+        var o = Object.assign({}, U.isEmpty($.query) ? $.options : $.query);
         if (U.isEmpty(o)) o = {};
         var sql = DB();
         sql.debug = true;

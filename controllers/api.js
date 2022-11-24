@@ -25,6 +25,6 @@ exports.install = function() {
 }
 
 function img_proxy(req, res) {
-    res.proxy(CONF.cdn.host + '/' + req.path.slice(-2).join('/'), NOOP);
+    res.proxy(CONF.cdn.host + '/' + req.path.slice(-2).join('/')+'?thumb=300', NOOP);
     return;
 }
