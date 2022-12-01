@@ -106,15 +106,26 @@ NEWSCHEMA('Product', function(schema) {
     });
 
     schema.addWorkflow('grid', function ($) {
-        var q = $.query;
-        q.page = q.page || 1;
-        q.limit = q.limit || 5;
+        var q = $.query||{};
         var sql = DB();
         sql.debug = true;
         sql.listing('product', 'product p').make(function(builder){
-            builder.fields('!p.*', '!pg.name category_name');
-            builder.join('product_category pg', 'pg.id = p.category_id');
-            builder.page(q.page, q.limit);            
+            //builder.fields('!p.*', '!pg.name category_name');
+            //builder.join('product_category pg', 'pg.id = p.category_id');           
+            if (q.category_id > 0) {
+                builder.where('category_id', q.category_id);
+            }
+            if (q.sort) builder.sort(q.sort, (q.order == 'asc') ? false : true);
+            else builder.sort('created_at', true);
+            if (q.search) {
+                builder.scope(function() {
+                    builder.like('name', q.search, '*');
+                    builder.or();
+                    builder.like('description', q.search, '*');
+                });               
+            };
+            builder.where('p.status', '>', -1);
+            builder.page(q.page, q.limit);
         });
                 
         sql.exec(function(err, resp) {
@@ -228,7 +239,7 @@ NEWSCHEMA('Product/Category', function(schema) {
         }, 'product_category');
     });
 
-    schema.addWorkflow('grid', function ($) {
+/*    schema.addWorkflow('grid', function ($) {
         var q = $.query;
         q.page = q.page || 1;
         q.limit = q.limit || 2;
@@ -246,7 +257,7 @@ NEWSCHEMA('Product/Category', function(schema) {
             if (!resp) $.success(false);
             return $.success(true, resp);
         }, 'product_category');
-    });
+    });*/
 
     schema.setQuery(function($) {
         var o = Object.assign({}, U.isEmpty($.query) ? $.options : $.query);
