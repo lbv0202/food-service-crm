@@ -21,10 +21,9 @@
 {{if status == 0}} <span class='text-gray text-nowrap' title='@(Register without confirm)'><i class="fas fa-circle" aria-hidden="true" ></i></span>
 	{{else if status == -1}}<span class='text-red text-nowrap' title='@(Removed)'><i class="fas fa-circle" aria-hidden="true" ></i></span>
 	{{else if status == 1}}<span class='text-green text-nowrap' title='@(Active)'><i class="fas fa-circle" aria-hidden="true" ></i></span>
-	{{else if status == 2}}<span class='text-gray text-nowrap' title='@(Blocked)'><i class="fas fa-circle" aria-hidden="true" ></i></span>
+	{{else if status == 0}}<span class='text-gray text-nowrap' title='@(Blocked)'><i class="fas fa-circle" aria-hidden="true" ></i></span>
 {{fi}}
 </template>
-
 <template id="taProductAct">
 	<div class="btn-group">
 		<a class="btn btn-default btn-sm edit" href="javascript:void(0)" title="@(Edit product)"><i class="fa fa-edit fa-fw"></i></a>
