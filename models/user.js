@@ -4,7 +4,7 @@ NEWSCHEMA('User', function(schema) {
     schema.define('id'        		, 'Number'     	  	            );  	
 	schema.define('first_name'      , 'String(50)',  true, 'cu'     );  	
 	schema.define('last_name'       , 'String(50)',  true, 'cu'     );  	
-	schema.define('role'   		    , 'Number'    ,	  	   'c'      );  	
+	schema.define('role'   		    , 'Number'    ,	  	   'cu'      );  	
 	schema.define('status'   	    , 'Number'    ,	  	   'c'      );  	
 	schema.define('email'   	    , 'String(50)',   	   'cu'     );  	
 	schema.define('phone'   	    , 'String(20)',   	   'cu'     );  	
@@ -17,7 +17,8 @@ NEWSCHEMA('User', function(schema) {
 	schema.setResource('default');   
 
     schema.setDefault(function(property) {    		
-		if (property === 'status')      	   return 1;   	
+		if (property === 'status')      	   return 1;
+		if (property === 'telegram_uid')	   return null;
 		if (property === 'created_at')         return new Date();   	
 		if (property === 'updated_at')         return new Date();   	
   	}); 
@@ -113,17 +114,34 @@ NEWSCHEMA('User', function(schema) {
 		var sql = DB(); 		
 		sql.debug = true;
 		sql.listing('user', 'user').make(function(builder) {
-			builder.like('last_name', q.last_name, '*');
 			builder.page(q.page, q.limit);
 		})
+
+		if (q.search) {
+			builder.scope(function() {
+				builder.like('last_name', q.search, '*');
+				builder.or();
+				builder.like('first_name', q.search, '*');
+				builder.or();
+				builder.like('login', q.search, '*');
+				builder.or();
+				builder.like('email', q.search, '*');
+			});
+		};
+		if (isNum(q.status)) {
+			builder.where('status', q.status);
+		}
+		else 
+		builder.where('status', '>', -1);
+		builder.page(q.page, q.limit);
 
 		sql.exec(function(err, resp) {                      
 			if (err) {
 				LOGGER('error', 'User/grid', err);
-				return $.success(false);
+				$.callback([]);
 			}									
-			return $.success(true, resp);
-		}, 'user')			
+			$.callback({'total': resp.count, 'rows': resp.items});
+		}, 'user');	
     });
 })
 
