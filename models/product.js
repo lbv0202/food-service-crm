@@ -109,7 +109,7 @@ NEWSCHEMA('Product', function(schema) {
         var q = $.query||{};
         var sql = DB();
         sql.debug = true;
-        sql.listing('product', 'product p').make(function(builder){
+        sql.listing('product', 'product').make(function(builder){
             //builder.fields('!p.*', '!pg.name category_name');
             //builder.join('product_category pg', 'pg.id = p.category_id');           
             if (q.category_id > 0) {
@@ -124,7 +124,7 @@ NEWSCHEMA('Product', function(schema) {
                     builder.like('description', q.search, '*');
                 });               
             };
-            builder.where('p.status', '>', -1);
+            builder.where('status', '>', -1);
             builder.page(q.page, q.limit);
         });
                 
@@ -184,7 +184,7 @@ NEWSCHEMA('Product/Category', function(schema) {
             else if (typeof o.status == 'string') builder.in('status', o.status);
             else if (isNum(o.status)) builder.where('status', o.status);
             else builder.where('status', '>', -1);
-        builder.first();
+            builder.first();
         });
         sql.exec(function(err, resp) {
             if (err) {

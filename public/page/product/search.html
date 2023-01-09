@@ -5,7 +5,7 @@
             	@(Category)
             	<div class="box-tools pull-right">	                
 					<div class="btn-group btn-group-sm">
-	                   <button title="@(Add category)" type="button" class="btn btn-default text-green"><i class="fas fa-plus"></i></button>
+	                    <button title="@(Add category)" type="button" class="btn btn-default text-green"><i class="fas fa-plus"></i></button>
                         <button title="@(Edit category)" type="button" class="btn btn-default"><i class="fas fa-edit"></i></button>
                         <button title="@(Remove category)" type="button" class="btn btn-default text-red"><i class="fas fa-trash-alt"></i></button>
                     </div>
@@ -63,9 +63,10 @@
 		</div>	
 	</div>		
 </div>
+<div data-import="url:/page/product/win/create.html"></div>
 <script>
 PLUGIN('ProductSearch', function(exports) {
-    SET('?.cateory_id', 0);
+    SET('?.category_id', 0);
     exports.reload = function() {
         SET('current.title', '@(Product search)');
         SET('current.description', '@(You can search product)');
@@ -90,9 +91,9 @@ PLUGIN('ProductSearch', function(exports) {
         return params;
     };
 
-	exports.addProdduct = function() {
+	exports.addProduct = function() {
 		SET('common.form', 'product_cu');
-	}
+	};
 
     exports.refreshGrid = function() {
         FIND('.dataProductGrid').refresh();
@@ -105,14 +106,14 @@ PLUGIN('ProductSearch', function(exports) {
 			SET('common.form', 'product_cu');
 		},
 		'click .remove': function(e, value, row, index) {
-			SETTER('confirm', 'show2', '@(Do you really want to remove the product <b>{0}</b>)'.format(row.name), ['"trash-alt" Remove', 'Cancel'], () => {
+			SETTER('confirm', 'show2', '@(Do you really want to remove the product <b>{0}</b>?)'.format(row.name), ['"trash-alt" Remove', 'Cancel'], () => {
 				AJAX('DELETE /api/product/{0}'.format(row.id), {}, (resp, err) => {
 					if (err || !resp.success) {
-						SETTER('notify', 'apeend', '@(Error when deleting the product)', 2);
+						SETTER('notify', 'append', '@(Error when deleting the product)', 2);
 						return;
 					}
 					EXEC('?/refreshGrid');
-					SETTER('notify', 'append', '@(Product has been successully removed)');
+					SETTER('notify', 'append', '@(Product has been successfully removed)');
 					return;
 				})
 			});

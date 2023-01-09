@@ -6476,6 +6476,248 @@ COMPONENT('upload', function(self) {
 		});
 	};
 });
+
+COMPONENT('toast', 'timeout:8; position:top-right; loader:true; animate:fade', function(self, config) {        
+    self.singleton();
+    self.readonly();  
+    self.template = Tangular.compile('<div class="ui-toast {{ type }}" data-id="{{ id }}" {{ if callback }} style="cursor:pointer"{{ fi }}>{{ if loader }}<div class="loader"></div>{{fi}}<i class="fa fa-times"></i><div class="ui-toast-icon">{{if icon }}<i class="fa {{ icon }}"></i>{{fi}}{{if img }}{{ img | raw }}{{fi}}</div><div class="ui-toast-message">{{if date }}<div class="ui-toast-datetime">{{ date }}</div>{{fi}}{{ mess | raw }}</div></div>');
+    self.items = {};
+    self.make = function() {
+        self.aclass('ui-toast-container');
+        let position = config.position || 'top-right';        
+        self.aclass(position);     
+
+        self.event('click', 'a,button', function(e) {
+            e.stopPropagation();
+        });
+
+        self.event('click', '.ui-toast', function() {
+            var el = $(this);
+            var id = el.attr('data-id');            
+            var obj = self.items[id];            
+            self.close(obj.id);
+        });
+    };
+
+    self.configure = function(key, value, init, prev) {
+        if (init)
+            return;
+        if (key=='position') {
+            self.rclass();
+            self.aclass('ui-toast-container '+value);
+        }        
+    };
+
+    self.close = function(id) {
+        var obj = self.items[id];          
+        if (obj.autoClose) clearTimeout(obj.autoClose);
+        if (!obj) return;
+        if (obj.callback) obj.callback(obj);
+        obj.callback = null;
+        delete self.items[id];        
+        if (config.animate == 'fade') {
+            self.find('div[data-id="{0}"]'.format(id)).fadeOut('normal', function() { $(this).remove()});
+        } else if (config.animate == 'slide') {
+            self.find('div[data-id="{0}"]'.format(id)).slideUp('normal', function() { $(this).remove()});    
+        }
+          else {
+            self.find('div[data-id="{0}"]'.format(id)).remove();
+        }        
+    };
+
+    self.success = function(mess, o, callback) {                
+        self.append(mess, o, callback||null, 'success', 'check');
+    };    
+    self.warning = function(mess, o, callback) {                
+        self.append(mess, o, callback||null, 'warning', 'exclamation-triangle');
+    };    
+    self.error = function(mess, o, callback) {                        
+        self.append(mess, o, callback||null, 'error', 'bell');
+    };    
+    self.info = function(mess, o, callback) {                
+        self.append(mess, o, callback||null, 'info', 'info-circle');
+    }; 
+
+    self.append = function(mess, o, callback, tp, ic) { 
+        console.log(config);
+        if (typeof(o) === 'function') {
+            callback = o;
+            o = null;
+        }
+        if (!o) o = {};
+        o.type = o.type || tp || null;
+        o.icon = o.icon || ic || null;
+        let id = o.id||Math.floor(Math.random() * 100000);
+        let type = (o.type) ? o.type : '';
+        let icon = (o.icon) ? 'fa-' + o.icon : null;
+        let img = (o.img) ? "<img class='img-rounded img-responsive' src='" + o.img + "'>" : null;
+        let date = (o.date) ? o.date.format(config.format) : (config.dateAlways) ? new Date().format(config.format): null;       
+
+        var obj = { id:id, type:type, icon:icon, img:img, mess:mess, date:date, callback: callback }; 
+        obj.timeout = o.timeout || config.timeout;
+        if (obj.timeout) obj.timeout *= 1000;
+        obj.loader = o.loader || config.loader;         
+        self.items[obj.id] = obj;
+        var elem = self.template(obj);
+        self.element.append(elem);
+
+        if (config.animate == 'fade') {        
+          self.element.find('.ui-toast:last').hide().fadeIn();                
+        } else if (config.animate == 'slide') {
+            self.element.find('.ui-toast:last').hide().slideDown();                            
+        }      
+        if (obj.loader) {
+            self.updateLoader(obj);            
+        }
+        if (obj.timeout) self.autoclose(obj);
+    };
+
+    self.updateLoader = function(obj) {                        
+        var el = self.find('.ui-toast[data-id="'+obj.id+'"] .loader');
+        var transitionTime = (obj.timeout/1000)+'s';        
+        var style = '';
+        style += '-webkit-transition: width ' + transitionTime + ' ease-in; \
+                  -o-transition: width ' + transitionTime + ' ease-in; \
+                  transition: width ' + transitionTime + ' ease-in; \
+                  background-color: #000; \
+                  opacity:.4;-ms-filter:progid:DXImageTransform.Microsoft.Alpha(Opacity=40);filter:alpha(opacity=40);';
+        el.attr('style', style);          
+        setTimeout(function() {el.aclass('loaded'); }, 300);        
+    };    
+
+    self.autoclose = function(obj) {
+        obj.autoClose = setTimeout(function() {                                    
+            self.close(obj.id);            
+        }, obj.timeout);        
+    };
+});
+
+COMPONENT('websocket', 'reconnect:3000;encoder:true', function(self, config) {
+
+	var ws, url;
+	var queue = [];
+	var sending = false;
+
+	self.online = false;
+	self.readonly();
+	self.nocompile && self.nocompile();
+
+	self.make = function() {
+		url = (config.url || '').env(true);
+		if (!url.match(/^(ws|wss):\/\//))
+			url = (location.protocol.length === 6 ? 'wss' : 'ws') + '://' + location.host + (url.substring(0, 1) !== '/' ? '/' : '') + url;
+		setTimeout(self.connect, 500);
+		self.destroy = self.close;
+
+		$(W).on('offline', function() {
+			self.close();
+		});
+
+		$(W).on('online', function() {
+			setTimeout(self.connect, config.reconnect);
+		});
+
+	};
+
+	self.send = function(obj) {
+		var data = JSON.stringify(obj);
+		if (config.encoder)
+			queue.push(encodeURIComponent(data));
+		else
+			queue.push(data);
+		self.process();
+		return self;
+	};
+
+	self.process = function(callback) {
+
+		if (!ws || !ws.send || sending || !queue.length || ws.readyState !== 1) {
+			callback && callback();
+			return;
+		}
+
+		sending = true;
+		var async = queue.splice(0, 3);
+
+		async.wait(function(item, next) {
+			if (ws) {
+				ws.send(item);
+				setTimeout(next, 5);
+			} else {
+				queue.unshift(item);
+				next();
+			}
+		}, function() {
+			callback && callback();
+			sending = false;
+			queue.length && self.process();
+		});
+	};
+
+	self.close = function(isClosed) {
+		if (!ws)
+			return self;
+		self.online = false;
+		ws.onopen = ws.onclose = ws.onmessage = null;
+		!isClosed && ws.close();
+		ws = null;
+		self.isonline(false);
+		return self;
+	};
+
+	self.isonline = function(is) {
+		if (config.online)
+			self.EXEC(config.online, is);
+		else
+			EMIT('online', is);
+	};
+
+	function onClose(e) {
+
+		if (e.code === 4001) {
+			location.href = location.href + '';
+			return;
+		}
+
+		e.reason && WARN('WebSocket:', config.encoder ? decodeURIComponent(e.reason) : e.reason);
+		self.close(true);
+		setTimeout(self.connect, config.reconnect);
+	}
+
+	function onMessage(e) {
+
+		var data;
+
+		try {
+			data = PARSE(config.encoder ? decodeURIComponent(e.data) : e.data);
+		} catch (e) {
+			return;
+		}
+
+		if (config.message)
+			self.EXEC(config.message, data);
+		else
+			EMIT('message', data);
+	}
+
+	function onOpen() {
+		self.online = true;
+		self.process(function() {
+			self.isonline(true);
+		});
+	}
+
+	self.connect = function() {
+		ws && self.close();
+		setTimeout2(self.ID, function() {
+			ws = new WebSocket(url.env(true));
+			ws.onopen = onOpen;
+			ws.onclose = onClose;
+			ws.onmessage = onMessage;
+		}, 100);
+		return self;
+	};
+});
 /*INITIALS*/
 var TTIC = ['#1abc9c','#2ecc71','#3498db','#9b59b6','#34495e','#16a085','#2980b9','#8e44ad','#2c3e50','#f1c40f','#e67e22','#e74c3c','#d35400','#c0392b'];
 
@@ -6561,4 +6803,6 @@ Thelpers.initialsbase64 = function(value, width, height) {
    - FILEUPLOAD  - comp
    - UPLOAD		 - comp
    - INITIALS
-   - MINIFORM	 - comp*/
+   - MINIFORM	 - comp
+   - WEBSOCKET   - comp
+   - toast		 - saper*/

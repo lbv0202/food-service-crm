@@ -2,7 +2,7 @@
     <div class="col-md-8 center-block" style="float:none">
         <div class="box box-default">
             <div class="box-header with-border">
-                @(UserParams)
+                @(User Params)
             </div>
             <div class="box-body">
                 <div class="form-group">
@@ -21,10 +21,10 @@
                     <div data---="textbox__?.form.login__placeholder:@(Input login...);class:form-control;required:true;maxlength:100">@(Login)</div>
                 </div>
                 <div class="form-group">
-                    <div data---="dropdown__?.form.role__items:Admin|1,Manager|2,Courier|3,empty:@(Choice role);type:number;class:from-control;required:true">@(Role)</div>
+                    <div data---="dropdown__?.form.role__items:Admin|1,Manager|2,Courier|3;empty:@(Choice role);type:number;class:form-control;required:true">@(Role)</div>
                 </div>
                 <div class="form-group">
-                    <div data---="dropdown__?.form.status__items:Active|1,Blocked|2,empty:@(Choice status);type:number;class:from-control;required:true">@(Status)</div>
+                    <div data---="dropdown__?.form.status__items:Active|1,Blocked|2;empty:@(Choice status);type:number;class:form-control;required:true">@(Status)</div>
                 </div>
             </div>
             <div class="box-footer text-center mt12">

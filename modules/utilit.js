@@ -43,7 +43,7 @@ exports.setCompany = function() {
 exports.setCDN = function() {
     MAIN.cdn = {};
     CONF.cdn = U.parseJSON(CONF.cdn) || {};
-    MAIN.cdn.upload = CONF.cdn.host + '/upload?key =' + CONF.cdn.key;
+    MAIN.cdn.upload = CONF.cdn.host + '/upload?key=' + CONF.cdn.key;
 }
 /**
  * Type of root directory depending on the role

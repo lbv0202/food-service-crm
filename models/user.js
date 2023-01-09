@@ -108,33 +108,33 @@ NEWSCHEMA('User', function(schema) {
 	});
 
     schema.addWorkflow('grid', function($) {
-		var q = $.query;
+		var q = $.query || {};
 		q.page = q.page || 1;
 		q.limit = q.limit || 30;
 		var sql = DB(); 		
 		sql.debug = true;
 		sql.listing('user', 'user').make(function(builder) {
+			if (q.sort) builder.sort(q.sort, (q.order=='asc') ? false : true);
+			else builder.sort('created_at', true);
+			if (q.search) {
+				builder.scope(function() {
+					builder.like('last_name', q.search, '*');
+					builder.or();
+					builder.like('first_name', q.search, '*');
+					builder.or();
+					builder.like('login', q.search, '*');
+					builder.or();
+					builder.like('email', q.search, '*');
+				});
+			};
+			if (isNum(q.status)) {
+				builder.where('status', q.status);
+			}
+			else 
+				builder.where('status', '>', -1);
 			builder.page(q.page, q.limit);
-		})
-
-		if (q.search) {
-			builder.scope(function() {
-				builder.like('last_name', q.search, '*');
-				builder.or();
-				builder.like('first_name', q.search, '*');
-				builder.or();
-				builder.like('login', q.search, '*');
-				builder.or();
-				builder.like('email', q.search, '*');
-			});
-		};
-		if (isNum(q.status)) {
-			builder.where('status', q.status);
-		}
-		else 
-		builder.where('status', '>', -1);
-		builder.page(q.page, q.limit);
-
+		});		
+		
 		sql.exec(function(err, resp) {                      
 			if (err) {
 				LOGGER('error', 'User/grid', err);

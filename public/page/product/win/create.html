@@ -6,20 +6,20 @@
             <a href="javascript:void(0);" class="exec" data-exec="?/remove_thumb"><i class="fas fa-trash-alt"></i>@(Remove)</a>
         </div>
         <div class="form-group">
-            <div data---="dropdown__?.form.category_id_datasource:?.list.Category;empty:@(Choice category);type:number;class:form-control;required:true;">@(Category)</div>
+            <div data---="dropdown__?.form.category_id__datasource:?.list.Category;empty:@(Choice category);type:number;class:form-control;required:true;">@(Category)</div>
         </div>
         <div class="form-group">
-            <div data---="textbox__?.form.name__placeholder:@(Name product)...;class:form-control;maxlength:200;required:true:">@(Name)</div>
+            <div data---="textbox__?.form.name__placeholder:@(Name product)...;class:form-control;maxlength:200;required:true;">@(Name)</div>
         </div>
-        <div class="form-gourp">
-            <div data---="dropdown__?.form.status__items:Ative|1,Blocked|0,Removed|1;empty:@(Choice status);type:number;class:form-control;required:true">@(Status)</div>
+        <div class="form-group">
+            <div data---="dropdown__?.form.status__items:Active|1,Blocked|0,Removed|1;empty:@(Choice status);type:number;class:form-control;required:true">@(Status)</div>
         </div>
         <div data---="textarea__?.form.summary__placeholder:@(Summary)">@(Summary)</div>
         <div class="form-group">
             <div data---="textbox__?.form.price__class:form-control;maxlength:200;type:number;required:true;">@(Price)</div>
         </div>
         <nav class="text-right">
-            <button name="sumbit" class="btn btn-success mh5">@(Save)</button>
+            <button name="submit" class="btn btn-success mh5">@(Save)</button>
             <button name="cancel" class="btn mh5">@(Close)</button>
         </nav>
     </div> 
@@ -32,13 +32,13 @@
         exports.upload_thumb = function() {
             var opt = {};
 
-            opt.url = 'cdn/upload';
+            opt.url = '/cdn/upload';
             opt.accept = 'image/*';
             opt.multiple = false;
 
             opt.callback = function(resp) {
                 if (resp.success) {
-                    SET('/?.form.thumb', '/cdn/' + resp.value[0].filepath);
+                    SET('?.form.thumb', '/cdn/' + resp.value[0].filepath);
                 }
             };
             SETTER('upload', 'show', opt);

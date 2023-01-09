@@ -4,7 +4,7 @@
     </div>
     <div class="box-tools pull-right">
         <div class="btn-group btn-group-sm">
-            <button title="@(Add user)" type="button" class="btn-default text-green exec" data-exec="?/add"><i class="fas fa-plus"></i>Add user</button>
+            <button title="@(Add user)" type="button" class="btn btn-default text-green exec" data-exec="?/add"><i class="fas fa-plus"></i>Add user</button>
             <button title="@(Remove choice user)" type="button" class="btn btn-default text-red"><i class="fas fa-trash-alt"></i>Remove choice user</button>
         </div>
     </div>
@@ -15,7 +15,7 @@
                     classes: 'table table-bordered table-hover table-stripted table-condensed',
                     cookie: true,
                     cookieStorage: 'localStorage',
-                    url: 'api/user/grid',
+                    url: '/api/user/grid',
                     queryParams: PLUGIN('UserSearch').queryParams,
                     pagination: true,
                     pageList: [25, 50, 100, 'All'],
@@ -24,19 +24,19 @@
                     search: true,
                     onCheck: PLUGIN('UserSearch').onGridCheck,
                     onUncehck: PLUGIN('UserSearch').onGridUncheck,
-                    uniqueID: 'id',
+                    uniqueId: 'id',
                     columns: [
                         {field: 'ck', checkbox: true},
                         {field: 'id', title: '#', switchable: false, sortable: true},
-                        {filed: 'first_name', title: '@(Name)', sortable: true, width: 150, tpl:'@taUserFio'},
+                        {filed: 'first_name', title: '@(Name)', sortable: true, width: 150, tpl:'#taUserFio'},
                         {field: 'login', title: '@(Login)', sortable: true},
                         {field: 'email', title: '@(Email)', sortable: true},
                         {field: 'phone', title: '@(Phone)', sortable: true},
-                        {field: 'role', title: '@(Role)', sortable: true, tpl:'taUserRole'},
-                        {field: 'status', title: '@(Status)', width: 50, tpl: '#taProdustStatus', sortable: true, align: 'center'},
-                        {field: 'created_at', title: '@(Created)', sortable: true, render: "return new Date(val).format('yyyy-MM-dd hh:mm:ss') : '-'"},
+                        {field: 'role', title: '@(Role)', sortable: true, tpl:'#taUserRole'},
+                        {field: 'status', title: '@(Status)', width: 50, tpl: '#taProductStatus', sortable: true, align: 'center'},
+                        {field: 'created_at', title: '@(Created)', sortable: true, render: "return new Date(val).format('yyyy-MM-dd hh:mm:ss')"},
                         {field: 'updated_at', title: '@(Updated)', sortable: true, render: "return (val) ? new Date(val).format('yyyy-MM-dd hh:mm:ss') : '-'"},
-                        { field: 'action', title: '', width: 90, align: 'center', tpl:'#taUserAct', events: PLUGIN('UserSearch').userEvents, clickToSelect: false, switchable: false }
+                        {field: 'action', title: '', width: 90, align: 'center', tpl:'#taUserAct', events: PLUGIN('UserSearch').userEvents, clickToSelect: false, switchable: false }
                     ]
                 }
             </script>
@@ -54,13 +54,16 @@
             REDIRECT('/user/add');
         };
 
-        exports.queryParams = fucntion(params) {
+        exports.queryParams = function(params) {
             return params;
-        }
+        };
 
-        exports.userEvent = {
-            'click.edit': function(e, value, row, index) {
-                SETTER('confirm', 'show2', '@(Do you really want to remove the user <b>{0}</b>?)'.format(row.login), ['trash-alt" Remove', 'Cancel'], () => {
+        exports.userEvents = {
+            'click .edit': function(e, value, row, index) {
+                REDIRECT('/user/edit/'+row.id);
+            },
+            'click .remove': function(e, value, row, index) {
+                SETTER('confirm', 'show2', '@(Do you really want to remove the user <b>{0}</b>?)'.format(row.login), ['"trash-alt" Remove', 'Cancel'], () => {
                     AJAX('DELETE /api/user/{0}'.format(row.id), {}, (resp, err) => {
                         if (err || !resp.success) {
                             SETTER('notify', 'append', '@(Error when deleting the user)', 2);
@@ -78,8 +81,8 @@
             FIND('.dataUserGrid').grid.bootstrapTable('checkBy', {field: 'up', values: [row.id]});
         };
 
-        esports.obGridUncheck = function(row, el) {
+        exports.obGridUncheck = function(row, el) {
             FIND('.dataUserGrid').grid.bootstrapTable('uncheckBy', {field: 'up', values: [row.id]});
         };
-    })
+    });
 </script>
